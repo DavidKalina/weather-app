@@ -6,7 +6,6 @@ interface CurrentWeatherProps {
 }
 
 const CurrentWeather: React.FC<CurrentWeatherProps> = ({ weather }) => {
-  console.log(weather);
   return (
     <div className="current-weather flex flex-col items-center justify-center">
       <div className="weather-icon text-8xl">

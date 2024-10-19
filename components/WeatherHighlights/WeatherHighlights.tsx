@@ -19,7 +19,7 @@ const WeatherHighlights: React.FC<WeatherHighlightsProps> = ({ highlights }) => 
   return (
     <div className="weather-highlights mt-8">
       <h2 className="text-2xl font-bold mb-4">Today&apos;s Highlights</h2>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="highlight-card p-4 bg-white rounded-lg shadow">
           <h3>UV Index</h3>
           <div className="uv-meter">

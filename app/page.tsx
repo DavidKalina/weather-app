@@ -79,30 +79,29 @@ const Home: React.FC = () => {
       } catch (error) {
         console.error("Error getting location:", error);
         // Fallback to a default location if geolocation fails
-        handleSearch({ latitude: 40.7128, longitude: -74.006 }); // New York City coordinates
+        await handleSearch({ latitude: 40.7128, longitude: -74.006 }); // New York City coordinates
       }
     };
 
     fetchInitialData();
-  }, [handleSearch]);
+  }, []);
 
   if (error) return <div>Error: {error}</div>;
-  // if (!weather || !forecast) return null;
 
   return (
     <div className="weather-app bg-gray-100 min-h-screen p-10 flex flex-col gap-4">
       <Header onSearch={handleSearch} onUnitToggle={handleUnitToggle} unit={unit} />
-      <div className="content-wrapper flex gap-4 flex-1">
+      <div className="content-wrapper flex flex-col md:flex-row gap-4 flex-1">
         {loading ? (
-          <div className="flex-1 flex items-center justify-center bo">
+          <div className="flex-1 flex items-center justify-center">
             <LoadingSpinner />
           </div>
         ) : (
           <>
-            <div className="left-panel w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center">
+            <div className="left-panel w-full md:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center">
               <CurrentWeather weather={weather} />
             </div>
-            <div className="right-panel w-2/3 p-0">
+            <div className="right-panel w-full md:w-2/3 p-0 flex flex-col justify-between">
               <WeeklyForecast forecast={forecast} />
               <WeatherHighlights
                 highlights={{
