@@ -1,8 +1,10 @@
+// File: /app/page.tsx
+
 "use client";
 
 import Header from "@/components/Header/Header";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { ForecastData, WeatherData } from "@/types";
+import { ForecastData, WeatherData, FavoriteLocation } from "@/types";
 import React, { useCallback, useEffect, useState } from "react";
 import CurrentWeather from "../components/WeatherDisplay";
 import WeatherHighlights from "../components/WeatherHighlights";
@@ -20,8 +22,23 @@ const Home: React.FC = () => {
     longitude: number;
   } | null>(null);
 
+  const [favorites, setFavorites] = useState<FavoriteLocation[]>([]); // New state for favorites
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const storedFavorites = localStorage.getItem("favorites");
+    if (storedFavorites) {
+      setFavorites(JSON.parse(storedFavorites));
+    }
+  }, []);
+
+  // Save favorites to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }, [favorites]);
+
   const handleSearch = useCallback(
-    async (coords: { latitude: number; longitude: number }) => {
+    async (coords: { latitude: number; longitude: number }, cityName?: string) => {
       setCurrentCoords(coords);
       setLoading(true);
       setError(null);
@@ -79,7 +96,7 @@ const Home: React.FC = () => {
       } catch (error) {
         console.error("Error getting location:", error);
         // Fallback to a default location if geolocation fails
-        await handleSearch({ latitude: 40.7128, longitude: -74.006 }); // New York City coordinates
+        await handleSearch({ latitude: 40.7128, longitude: -74.006 }, "New York City"); // New York City coordinates
       }
     };
 
@@ -88,9 +105,45 @@ const Home: React.FC = () => {
 
   if (error) return <div>Error: {error}</div>;
 
+  // Check if current location is a favorite
+  const isFavorite = favorites.some(
+    (fav) =>
+      fav.coordinates.latitude === currentCoords?.latitude &&
+      fav.coordinates.longitude === currentCoords?.longitude
+  );
+
+  // Function to toggle favorite
+  const toggleFavorite = () => {
+    if (!currentCoords || !weather) return;
+
+    if (isFavorite) {
+      // Remove from favorites
+      setFavorites((prevFavorites) =>
+        prevFavorites.filter(
+          (fav) =>
+            fav.coordinates.latitude !== currentCoords.latitude ||
+            fav.coordinates.longitude !== currentCoords.longitude
+        )
+      );
+    } else {
+      // Add to favorites
+      const newFavorite: FavoriteLocation = {
+        city: weather.city,
+        coordinates: { ...currentCoords },
+      };
+      setFavorites((prevFavorites) => [...prevFavorites, newFavorite]);
+    }
+  };
+
   return (
     <div className="weather-app bg-gray-100 min-h-screen p-10 flex flex-col gap-4">
-      <Header onSearch={handleSearch} onUnitToggle={handleUnitToggle} unit={unit} />
+      <Header
+        onSearch={handleSearch}
+        onUnitToggle={handleUnitToggle}
+        unit={unit}
+        favorites={favorites}
+        onSelectFavorite={(fav: any) => handleSearch(fav.coordinates, fav.city)}
+      />
       <div className="content-wrapper flex flex-col md:flex-row gap-4 flex-1">
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
@@ -98,8 +151,12 @@ const Home: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="left-panel w-full md:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center">
-              <CurrentWeather weather={weather} />
+            <div className="left-panel w-full md:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center relative">
+              <CurrentWeather
+                weather={weather}
+                isFavorite={isFavorite}
+                onToggleFavorite={toggleFavorite}
+              />
             </div>
             <div className="right-panel w-full md:w-2/3 p-0 flex flex-col justify-between">
               <WeeklyForecast forecast={forecast} />

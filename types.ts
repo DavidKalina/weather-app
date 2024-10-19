@@ -20,3 +20,13 @@ export interface Favorite {
   city: string;
   unit: "C" | "F";
 }
+
+// File: /types/index.ts (or any appropriate types file)
+
+export interface FavoriteLocation {
+  city: string;
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+}

@@ -1,13 +1,31 @@
+// File: /components/WeatherDisplay/WeatherDisplay.tsx
+
 import { WeatherData } from "@/types";
 import React from "react";
+import { FaHeart, FaRegHeart } from "react-icons/fa"; // Import heart icons
 
 interface CurrentWeatherProps {
   weather: WeatherData | null;
+  isFavorite: boolean; // New prop to indicate if current location is favorite
+  onToggleFavorite: () => void; // New prop for toggling favorite
 }
 
-const CurrentWeather: React.FC<CurrentWeatherProps> = ({ weather }) => {
+const CurrentWeather: React.FC<CurrentWeatherProps> = ({
+  weather,
+  isFavorite,
+  onToggleFavorite,
+}) => {
   return (
     <div className="current-weather flex flex-col items-center justify-center">
+      {/* Heart Icon */}
+      <div
+        className="favorite-icon absolute top-4 right-4 cursor-pointer text-red-500"
+        onClick={onToggleFavorite}
+        title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+      >
+        {isFavorite ? <FaHeart size={24} /> : <FaRegHeart size={24} />}
+      </div>
+
       <div className="weather-icon text-8xl">
         {/* Replace with appropriate weather icon based on conditions */}
         ☀️

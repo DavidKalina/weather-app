@@ -1,36 +1,51 @@
+// File: /components/Header/Header.tsx
+
 import React from "react";
 import AddressToCoordinates from "../AddressToCoordinates/AddressToCoordinates";
+import FavoritesDropdown from "../FavoritesDropdown/FavoritesDropdown";
+import { FavoriteLocation } from "@/types";
 
 interface HeaderProps {
   onSearch: (coords: { latitude: number; longitude: number }) => void;
   onUnitToggle: () => void;
   unit: "C" | "F";
+  favorites: FavoriteLocation[]; // New prop for favorites
+  onSelectFavorite: (fav: FavoriteLocation) => void; // New prop for selecting a favorite
 }
 
-const Header: React.FC<HeaderProps> = ({ onSearch, onUnitToggle, unit }) => {
+const Header: React.FC<HeaderProps> = ({
+  onSearch,
+  onUnitToggle,
+  unit,
+  favorites,
+  onSelectFavorite,
+}) => {
   return (
     <header className="flex justify-between items-center">
       <div className="search-bar flex items-center">
         <AddressToCoordinates onCoordinatesChange={onSearch} />
         <button className="bg-gray-200 p-2 rounded-r-lg">🔄</button>
       </div>
-      <div className="unit-toggle">
-        <button
-          className={`px-2 py-1 rounded-l-lg ${
-            unit === "C" ? "bg-black text-white" : "bg-gray-200"
-          }`}
-          onClick={() => unit === "F" && onUnitToggle()}
-        >
-          °C
-        </button>
-        <button
-          className={`px-2 py-1 rounded-r-lg ${
-            unit === "F" ? "bg-black text-white" : "bg-gray-200"
-          }`}
-          onClick={() => unit === "C" && onUnitToggle()}
-        >
-          °F
-        </button>
+      <div className="flex items-center gap-4">
+        <FavoritesDropdown favorites={favorites} onSelectFavorite={onSelectFavorite} />
+        <div className="unit-toggle flex">
+          <button
+            className={`px-2 py-1 rounded-l-lg ${
+              unit === "C" ? "bg-black text-white" : "bg-gray-200"
+            }`}
+            onClick={() => unit === "F" && onUnitToggle()}
+          >
+            °C
+          </button>
+          <button
+            className={`px-2 py-1 rounded-r-lg ${
+              unit === "F" ? "bg-black text-white" : "bg-gray-200"
+            }`}
+            onClick={() => unit === "C" && onUnitToggle()}
+          >
+            °F
+          </button>
+        </div>
       </div>
     </header>
   );

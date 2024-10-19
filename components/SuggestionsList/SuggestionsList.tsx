@@ -8,7 +8,7 @@ interface SuggestionListProps {
 
 const SuggestionList: React.FC<SuggestionListProps> = ({ suggestions, onSelectSuggestion }) => {
   return (
-    <div className="bg-white shadow-md rounded-md mt-2 absolute">
+    <div className="bg-white shadow-md rounded-md mt-2 absolute z-10">
       <ul className="divide-y divide-gray-200">
         {suggestions.map((item) => (
           <li key={item.id}>
