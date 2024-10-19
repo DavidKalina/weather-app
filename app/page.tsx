@@ -22,15 +22,14 @@ const Home: React.FC = () => {
     longitude: number;
   } | null>(null);
 
-  const [favorites, setFavorites] = useState<FavoriteLocation[]>([]); // New state for favorites
-
-  // Load favorites from localStorage on mount
-  useEffect(() => {
-    const storedFavorites = localStorage.getItem("favorites");
-    if (storedFavorites) {
-      setFavorites(JSON.parse(storedFavorites));
+  // Initialize favorites state with data from localStorage
+  const [favorites, setFavorites] = useState<FavoriteLocation[]>(() => {
+    if (typeof window !== "undefined") {
+      const storedFavorites = localStorage.getItem("favorites");
+      return storedFavorites ? JSON.parse(storedFavorites) : [];
     }
-  }, []);
+    return [];
+  });
 
   // Save favorites to localStorage whenever they change
   useEffect(() => {
@@ -50,6 +49,7 @@ const Home: React.FC = () => {
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unexpected error occurred");
       } finally {
+        // Added a delay for better UX
         setTimeout(() => {
           setLoading(false);
         }, 400);
@@ -62,12 +62,7 @@ const Home: React.FC = () => {
     setUnit((prevUnit) => (prevUnit === "C" ? "F" : "C"));
   };
 
-  useEffect(() => {
-    if (currentCoords) {
-      handleSearch(currentCoords);
-    }
-  }, [unit, currentCoords, handleSearch]);
-
+  // Function to get user's current location
   const getCurrentLocation = (): Promise<{ latitude: number; longitude: number }> => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -88,20 +83,33 @@ const Home: React.FC = () => {
     });
   };
 
+  // Fetch initial data based on favorites or current location
   useEffect(() => {
     const fetchInitialData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const coords = await getCurrentLocation();
-        await handleSearch(coords);
+        if (favorites.length > 0) {
+          // If there are favorites, fetch data for the first favorite
+          const firstFavorite = favorites[0];
+          await handleSearch(firstFavorite.coordinates, firstFavorite.city);
+        } else {
+          // Otherwise, use the user's current location
+          const coords = await getCurrentLocation();
+          await handleSearch(coords);
+        }
       } catch (error) {
-        console.error("Error getting location:", error);
-        // Fallback to a default location if geolocation fails
+        console.error("Error fetching initial data:", error);
+        // Fallback to a default location if fetching fails
         await handleSearch({ latitude: 40.7128, longitude: -74.006 }, "New York City"); // New York City coordinates
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchInitialData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   if (error) return <div>Error: {error}</div>;
 
@@ -142,7 +150,7 @@ const Home: React.FC = () => {
         onUnitToggle={handleUnitToggle}
         unit={unit}
         favorites={favorites}
-        onSelectFavorite={(fav: any) => handleSearch(fav.coordinates, fav.city)}
+        onSelectFavorite={(fav: FavoriteLocation) => handleSearch(fav.coordinates, fav.city)}
       />
       <div className="content-wrapper flex flex-col md:flex-row gap-4 flex-1">
         {loading ? (
