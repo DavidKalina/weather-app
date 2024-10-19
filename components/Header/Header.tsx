@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = ({
   onSelectFavorite,
 }) => {
   return (
-    <header className="flex justify-between items-center">
+    <header className="flex flex-col gap-4 md:gap-0 md:flex-row justify-between items-center">
       <div className="search-bar flex items-center">
         <AddressToCoordinates
           onCoordinatesChange={(coords) => onSearch(coords)}
