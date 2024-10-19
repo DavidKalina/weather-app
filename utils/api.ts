@@ -3,52 +3,58 @@ import axios from "axios";
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 const BASE_URL = "https://api.openweathermap.org/data/2.5";
-const GEO_URL = "https://api.openweathermap.org/geo/1.0";
+// const GEO_URL = "https://api.openweathermap.org/geo/1.0";
 
-interface Coordinates {
-  lat: number;
-  lon: number;
-  cityName: string;
-  country: string;
-}
+// interface Coordinates {
+//   lat: number;
+//   lon: number;
+//   cityName: string;
+//   country: string;
+// }
 
-async function getCoordinates(location: string): Promise<Coordinates> {
+// async function getCoordinates(location: string): Promise<Coordinates> {
+//   try {
+//     const response = await axios.get(`${GEO_URL}/direct`, {
+//       params: {
+//         q: location,
+//         limit: 1,
+//         appid: API_KEY,
+//       },
+//     });
+
+//     if (response.data.length === 0) {
+//       throw new Error("Location not found. Please check the spelling and try again.");
+//     }
+
+//     const { lat, lon, name: cityName, country } = response.data[0];
+//     return { lat, lon, cityName, country };
+//   } catch (error) {
+//     console.log(error);
+//     throw new Error("Failed to fetch location data. Please try again.");
+//   }
+// }
+
+export async function fetchWeather(
+  coords: {
+    latitude: number;
+    longitude: number;
+  },
+  unit: "F" | "C"
+): Promise<WeatherData> {
   try {
-    const response = await axios.get(`${GEO_URL}/direct`, {
-      params: {
-        q: location,
-        limit: 1,
-        appid: API_KEY,
-      },
-    });
-
-    if (response.data.length === 0) {
-      throw new Error("Location not found. Please check the spelling and try again.");
-    }
-
-    const { lat, lon, name: cityName, country } = response.data[0];
-    return { lat, lon, cityName, country };
-  } catch (error) {
-    console.log(error);
-    throw new Error("Failed to fetch location data. Please try again.");
-  }
-}
-
-export async function fetchWeather(location: string, unit: "C" | "F"): Promise<WeatherData> {
-  try {
-    const { lat, lon, cityName, country } = await getCoordinates(location);
     const response = await axios.get(`${BASE_URL}/weather`, {
       params: {
-        lat,
-        lon,
+        lat: coords.latitude,
+        lon: coords.longitude,
         units: unit === "C" ? "metric" : "imperial",
         appid: API_KEY,
       },
     });
 
     const { data } = response;
+
     return {
-      city: `${cityName}, ${country}`,
+      city: `${data?.name}`,
       temperature: Math.round(data.main.temp),
       unit,
       rainChance: 0,
@@ -65,13 +71,18 @@ export async function fetchWeather(location: string, unit: "C" | "F"): Promise<W
   }
 }
 
-export async function fetchForecast(location: string, unit: "C" | "F"): Promise<ForecastData[]> {
+export async function fetchForecast(
+  coords: {
+    latitude: number;
+    longitude: number;
+  },
+  unit: "C" | "F"
+): Promise<ForecastData[]> {
   try {
-    const { lat, lon } = await getCoordinates(location);
     const response = await axios.get(`${BASE_URL}/forecast`, {
       params: {
-        lat,
-        lon,
+        lat: coords.latitude,
+        lon: coords.longitude,
         units: unit === "C" ? "metric" : "imperial",
         appid: API_KEY,
       },

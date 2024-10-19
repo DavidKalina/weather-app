@@ -1,25 +1,17 @@
 import React from "react";
+import AddressToCoordinates from "../AddressToCoordinates/AddressToCoordinates";
 
 interface HeaderProps {
-  onSearch: (query: string) => void;
+  onSearch: (coords: { latitude: number; longitude: number }) => void;
   onUnitToggle: () => void;
   unit: "C" | "F";
 }
 
 const Header: React.FC<HeaderProps> = ({ onSearch, onUnitToggle, unit }) => {
   return (
-    <header className="flex justify-between items-center p-4">
+    <header className="flex justify-between items-center">
       <div className="search-bar flex items-center">
-        <input
-          type="text"
-          placeholder="Search for places ..."
-          className="p-2 rounded-l-lg"
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              onSearch((e.target as HTMLInputElement).value);
-            }
-          }}
-        />
+        <AddressToCoordinates onCoordinatesChange={onSearch} />
         <button className="bg-gray-200 p-2 rounded-r-lg">🔄</button>
       </div>
       <div className="unit-toggle">
