@@ -72,7 +72,7 @@ const useWeather = ({ unit, coords }: UseWeatherProps) => {
         // Added a delay for better UX
         setTimeout(() => {
           setLoading(false);
-        }, 400);
+        }, 800);
       }
     },
     [coords, unit]

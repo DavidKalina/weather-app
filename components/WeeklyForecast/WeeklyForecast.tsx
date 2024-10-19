@@ -2,52 +2,79 @@
 
 import React from "react";
 import { ForecastData } from "@/types";
+import { motion } from "framer-motion";
 
 interface WeeklyForecastProps {
   forecast: ForecastData[] | null;
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2, // Delay between each child animation
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, x: -50, y: 50 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 50,
+    },
+  },
+  hover: {
+    scale: 1.05, // Slightly enlarge the card
+    boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.2)", // Enhanced shadow
+    transition: {
+      duration: 0.3,
+      type: "spring",
+      stiffness: 300,
+    },
+  },
+};
+
 const WeeklyForecast: React.FC<WeeklyForecastProps> = ({ forecast }) => {
   if (!forecast) return null;
 
   return (
-    <div>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="weekly-forecast-container p-4"
+    >
       <h2 className="text-2xl font-bold mb-4">7-Day Forecast</h2>
-      <div className="weekly-forecast grid grid-cols-2 md:grid-cols-4 gap-4">
+      <motion.div
+        className="weekly-forecast grid grid-cols-2 md:grid-cols-4 gap-4"
+        variants={containerVariants}
+      >
         {forecast.map((day, index) => (
-          <div key={index} className="day-forecast text-center bg-white p-4 rounded-lg shadow">
+          <motion.div
+            key={index}
+            className="day-forecast text-center bg-white p-4 rounded-lg shadow"
+            variants={cardVariants}
+            // whileHover="hover"
+          >
             <p className="date font-semibold">{day.date}</p>
-            <img src={day.icon} alt="Weather Icon" className="weather-icon-small w-12 h-12" />
-            <p className="temp">{day.temperature}°</p>
+            <img
+              src={day.icon}
+              alt="Weather Icon"
+              className="weather-icon-small w-12 h-12 mx-auto"
+            />
+            <p className="temp text-lg font-medium">{day.temperature}°</p>
             <p className="description capitalize text-sm">{day.description}</p>
-          </div>
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
-
-// interface WeeklyForecastProps {
-//   forecast: ForecastData[] | null;
-// }
-
-// const WeeklyForecast: React.FC<WeeklyForecastProps> = ({ forecast }) => {
-//   return (
-//     <div>
-//       <h2 className="text-2xl font-bold mb-4">6-Day Forecast</h2>
-//       <div className="weekly-forecast grid grid-cols-2 md:grid-cols-4 gap-4">
-//         {forecast?.map((day, index) => (
-//           <div key={index} className="day-forecast text-center bg-white p-4 rounded-lg shadow">
-//             <p className="font-bold">{day.date}</p>
-//             <img src={day.icon} alt={day.description} className="mx-auto" />
-//             <p>{day.temperature}°</p>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default WeeklyForecast;
 
 export default WeeklyForecast;
