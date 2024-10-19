@@ -1,20 +1,25 @@
-import { ForecastData } from "@/types";
+// File: /src/components/WeeklyForecast/WeeklyForecast.tsx
+
 import React from "react";
+import { ForecastData } from "@/types";
 
 interface WeeklyForecastProps {
   forecast: ForecastData[] | null;
 }
 
 const WeeklyForecast: React.FC<WeeklyForecastProps> = ({ forecast }) => {
+  if (!forecast) return null;
+
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">6-Day Forecast</h2>
-      <div className="weekly-forecast grid grid-cols-2 md:grid-cols-4 gap-4">
-        {forecast?.map((day, index) => (
-          <div key={index} className="day-forecast text-center bg-white p-4 rounded-lg shadow">
-            <p className="font-bold">{day.date}</p>
-            <img src={day.icon} alt={day.description} className="mx-auto" />
-            <p>{day.temperature}°</p>
+    <div className="forecast-display p-4 rounded-lg">
+      <h3 className="text-xl font-bold mb-4">7-Day Forecast</h3>
+      <div className="flex flex-wrap justify-between">
+        {forecast.map((day, index) => (
+          <div key={index} className="forecast-item flex flex-col items-center w-1/4 md:w-1/7">
+            <p className="date font-semibold">{day.date}</p>
+            <img src={day.icon} alt="Weather Icon" className="weather-icon-small w-12 h-12" />
+            <p className="temp">{day.temperature}°</p>
+            <p className="description capitalize text-sm">{day.description}</p>
           </div>
         ))}
       </div>

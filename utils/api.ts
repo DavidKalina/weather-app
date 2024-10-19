@@ -1,109 +1,82 @@
-import { WeatherData, ForecastData } from "@/types";
+// File: /src/utils/api.ts
+
 import axios from "axios";
+import { WeatherAPIResponse, ForecastData } from "@/types";
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
-const BASE_URL = "https://api.openweathermap.org/data/2.5";
-// const GEO_URL = "https://api.openweathermap.org/geo/1.0";
+const BASE_URL = "https://api.openweathermap.org/data/3.0/onecall";
 
-// interface Coordinates {
-//   lat: number;
-//   lon: number;
-//   cityName: string;
-//   country: string;
-// }
+// Helper function to convert UNIX timestamp to readable date
+const convertUnixToDate = (dt: number): string => {
+  const date = new Date(dt * 1000);
+  return date.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+};
 
-// async function getCoordinates(location: string): Promise<Coordinates> {
-//   try {
-//     const response = await axios.get(`${GEO_URL}/direct`, {
-//       params: {
-//         q: location,
-//         limit: 1,
-//         appid: API_KEY,
-//       },
-//     });
+// Helper function to map the API response to ForecastData
+const mapDailyToForecast = (daily: WeatherAPIResponse["daily"]): ForecastData[] => {
+  return daily.map((day) => ({
+    date: convertUnixToDate(day.dt),
+    temperature: Math.round(day.temp.day),
+    description: day.weather[0].description,
+    icon: `http://openweathermap.org/img/wn/${day.weather[0].icon}.png`,
+  }));
+};
 
-//     if (response.data.length === 0) {
-//       throw new Error("Location not found. Please check the spelling and try again.");
-//     }
-
-//     const { lat, lon, name: cityName, country } = response.data[0];
-//     return { lat, lon, cityName, country };
-//   } catch (error) {
-//     console.log(error);
-//     throw new Error("Failed to fetch location data. Please try again.");
-//   }
-// }
+// Interface for Current Weather Data
+export interface WeatherData {
+  city: string;
+  temperature: number;
+  unit: "C" | "F";
+  rainChance: number;
+  description: string;
+  icon: string;
+  humidity: number;
+  windSpeed: number;
+  windDeg: number; // Added
+  visibility: number; // Added
+  uvi: number;
+  sunrise: string;
+  sunset: string;
+  coords?: {
+    lat: number;
+    lon: number;
+  };
+  dt?: number;
+}
 
 export async function fetchWeather(
-  coords: {
-    latitude: number;
-    longitude: number;
-  },
-  unit: "F" | "C"
-): Promise<WeatherData> {
+  coords: { latitude: number; longitude: number },
+  unit: "C" | "F"
+): Promise<WeatherAPIResponse> {
   try {
-    const response = await axios.get(`${BASE_URL}/weather`, {
+    const response = await axios.get(`${BASE_URL}`, {
       params: {
         lat: coords.latitude,
         lon: coords.longitude,
         units: unit === "C" ? "metric" : "imperial",
+        exclude: "minutely,alerts",
         appid: API_KEY,
       },
     });
 
     const { data } = response;
 
-    return {
-      city: `${data?.name}`,
-      temperature: Math.round(data.main.temp),
-      unit,
-      rainChance: 0,
-      description: data.weather[0].description,
-      icon: `http://openweathermap.org/img/wn/${data.weather[0].icon}.png`,
-      humidity: data.main.humidity,
-      windSpeed: Math.round(data.wind.speed * 10) / 10,
-    };
+    // Fetch air quality separately
+
+    return { ...data };
   } catch (error) {
-    if (error instanceof Error && error.message.includes("Location not found")) {
-      throw error;
-    }
-    throw new Error("Failed to fetch weather data. Please try again.");
+    console.error("Error fetching weather data:", error);
+    throw new Error("Failed to fetch weather data.");
   }
 }
 
-export async function fetchForecast(
-  coords: { latitude: number; longitude: number },
-  unit: "C" | "F"
-): Promise<ForecastData[]> {
+// Fetch Forecast Data
+export async function fetchForecast(weatherData: WeatherAPIResponse): Promise<ForecastData[]> {
   try {
-    const response = await axios.get(`${BASE_URL}/forecast`, {
-      params: {
-        lat: coords.latitude,
-        lon: coords.longitude,
-        units: unit === "C" ? "metric" : "imperial",
-        appid: API_KEY,
-      },
-    });
-
-    const { data } = response;
-    const dailyForecasts: { [key: string]: ForecastData } = {};
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data.list.forEach((item: any) => {
-      const date = new Date(item.dt * 1000).toLocaleDateString();
-      if (!dailyForecasts[date] || item.main.temp > dailyForecasts[date].temperature) {
-        dailyForecasts[date] = {
-          date,
-          temperature: Math.round(item.main.temp),
-          description: item.weather[0].description,
-          icon: `http://openweathermap.org/img/wn/${item.weather[0].icon}.png`,
-        };
-      }
-    });
-
-    return Object.values(dailyForecasts);
+    const forecast = mapDailyToForecast(weatherData.daily);
+    return forecast;
   } catch (error) {
-    console.error("Error fetching forecast data:", error);
-    throw new Error("Failed to fetch forecast data. Please try again.");
+    console.error("Error processing forecast data:", error);
+    throw new Error("Failed to process forecast data.");
   }
 }

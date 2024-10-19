@@ -2,145 +2,54 @@
 
 "use client";
 
+import React, { useEffect, useState } from "react";
 import Header from "@/components/Header/Header";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { ForecastData, WeatherData, FavoriteLocation } from "@/types";
-import React, { useCallback, useEffect, useState } from "react";
-import CurrentWeather from "../components/WeatherDisplay";
-import WeatherHighlights from "../components/WeatherHighlights";
-import WeeklyForecast from "../components/WeeklyForecast";
-import { fetchForecast, fetchWeather } from "../utils/api";
+import CurrentWeather from "@/components/WeatherDisplay/WeatherDisplay";
+import WeeklyForecast from "@/components/WeeklyForecast/WeeklyForecast";
+import WeatherHighlights from "@/components/WeatherHighlights/WeatherHighlights";
+import useFavorites from "@/hooks/useFavorites";
+import useWeather from "@/hooks/useWeather";
+import { FavoriteLocation } from "@/types";
+import { getWindDirection } from "@/utils/getWindDirection";
 
 const Home: React.FC = () => {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [forecast, setForecast] = useState<ForecastData[] | null>(null);
+  // Manage unit state
   const [unit, setUnit] = useState<"C" | "F">("C");
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentCoords, setCurrentCoords] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
 
-  // Initialize favorites state with data from localStorage
-  const [favorites, setFavorites] = useState<FavoriteLocation[]>(() => {
-    if (typeof window !== "undefined") {
-      const storedFavorites = localStorage.getItem("favorites");
-      return storedFavorites ? JSON.parse(storedFavorites) : [];
-    }
-    return [];
+  // Custom hooks
+  const { favorites, toggleFavorite, removeFavorite } = useFavorites();
+  const { weather, forecast, loading, error, handleSearch } = useWeather({
+    unit,
+    coords: null, // Initially null; will be set based on geolocation or favorites
   });
 
-  // Save favorites to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-  }, [favorites]);
-
-  const handleSearch = useCallback(
-    async (coords: { latitude: number; longitude: number }, cityName?: string) => {
-      setCurrentCoords(coords);
-      setLoading(true);
-      setError(null);
-      try {
-        const weatherData = await fetchWeather(coords, unit);
-        setWeather(weatherData);
-        const forecastData = await fetchForecast(coords, unit);
-        setForecast(forecastData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unexpected error occurred");
-      } finally {
-        // Added a delay for better UX
-        setTimeout(() => {
-          setLoading(false);
-        }, 400);
-      }
-    },
-    [unit]
-  );
-
+  // Handle unit toggle
   const handleUnitToggle = () => {
     setUnit((prevUnit) => (prevUnit === "C" ? "F" : "C"));
   };
 
-  // Function to get user's current location
-  const getCurrentLocation = (): Promise<{ latitude: number; longitude: number }> => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error("Geolocation is not supported by your browser"));
-      } else {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            resolve({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            });
-          },
-          (error) => {
-            reject(error);
-          }
-        );
-      }
-    });
-  };
+  // Handle favorite toggling
+  const handleToggleFavorite = () => {
+    if (!weather) return;
 
-  // Fetch initial data based on favorites or current location
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        if (favorites.length > 0) {
-          // If there are favorites, fetch data for the first favorite
-          const firstFavorite = favorites[0];
-          await handleSearch(firstFavorite.coordinates, firstFavorite.city);
-        } else {
-          // Otherwise, use the user's current location
-          const coords = await getCurrentLocation();
-          await handleSearch(coords);
-        }
-      } catch (error) {
-        console.error("Error fetching initial data:", error);
-        // Fallback to a default location if fetching fails
-        await handleSearch({ latitude: 40.7128, longitude: -74.006 }, "New York City"); // New York City coordinates
-      } finally {
-        setLoading(false);
-      }
+    const currentFavorite: FavoriteLocation = {
+      city: weather.city,
+      coordinates: {
+        latitude: weather.coords?.lat || 0,
+        longitude: weather.coords?.lon || 0,
+      },
     };
 
-    fetchInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
+    toggleFavorite(currentFavorite);
+  };
 
-  if (error) return <div>Error: {error}</div>;
-
-  // Check if current location is a favorite
-  const isFavorite = favorites.some(
-    (fav) =>
-      fav.coordinates.latitude === currentCoords?.latitude &&
-      fav.coordinates.longitude === currentCoords?.longitude
-  );
-
-  // Function to toggle favorite
-  const toggleFavorite = () => {
-    if (!currentCoords || !weather) return;
-
-    if (isFavorite) {
-      // Remove from favorites
-      setFavorites((prevFavorites) =>
-        prevFavorites.filter(
-          (fav) =>
-            fav.coordinates.latitude !== currentCoords.latitude ||
-            fav.coordinates.longitude !== currentCoords.longitude
-        )
-      );
-    } else {
-      // Add to favorites
-      const newFavorite: FavoriteLocation = {
-        city: weather.city,
-        coordinates: { ...currentCoords },
-      };
-      setFavorites((prevFavorites) => [...prevFavorites, newFavorite]);
-    }
+  // Handle selecting a favorite
+  const handleSelectFavorite = async (fav: FavoriteLocation) => {
+    await handleSearch({
+      latitude: fav.coordinates.latitude,
+      longitude: fav.coordinates.longitude,
+    });
   };
 
   return (
@@ -150,34 +59,44 @@ const Home: React.FC = () => {
         onUnitToggle={handleUnitToggle}
         unit={unit}
         favorites={favorites}
-        onSelectFavorite={(fav: FavoriteLocation) => handleSearch(fav.coordinates, fav.city)}
+        onSelectFavorite={handleSelectFavorite}
       />
       <div className="content-wrapper flex flex-col md:flex-row gap-4 flex-1">
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
             <LoadingSpinner />
           </div>
+        ) : error ? (
+          <div className="flex-1 flex items-center justify-center text-red-500">{error}</div>
         ) : (
           <>
             <div className="left-panel w-full md:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center relative">
               <CurrentWeather
                 weather={weather}
-                isFavorite={isFavorite}
-                onToggleFavorite={toggleFavorite}
+                isFavorite={
+                  weather?.coords
+                    ? favorites.some(
+                        (fav) =>
+                          fav.coordinates.latitude === weather?.coords?.lat ||
+                          (0 && fav.coordinates.longitude === weather?.coords?.lon) ||
+                          0
+                      )
+                    : false
+                }
+                onToggleFavorite={handleToggleFavorite}
               />
             </div>
             <div className="right-panel w-full md:w-2/3 p-0 flex flex-col justify-between">
               <WeeklyForecast forecast={forecast} />
               <WeatherHighlights
                 highlights={{
-                  uvIndex: 5,
-                  windSpeed: 7.7,
-                  windDirection: "WSW",
-                  sunrise: "6:35 AM",
-                  sunset: "5:42 PM",
-                  humidity: 12,
-                  visibility: 5.2,
-                  airQuality: 105,
+                  uvIndex: weather?.uvi || 0,
+                  windSpeed: weather?.windSpeed || 0,
+                  windDirection: weather?.windDeg ? getWindDirection(weather.windDeg) : "N/A",
+                  sunrise: weather?.sunrise || "",
+                  sunset: weather?.sunset || "",
+                  humidity: weather?.humidity || 0,
+                  visibility: weather?.visibility || 0, // Already in km
                 }}
               />
             </div>

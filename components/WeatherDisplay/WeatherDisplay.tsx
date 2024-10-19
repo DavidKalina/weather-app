@@ -1,13 +1,13 @@
-// File: /components/WeatherDisplay/WeatherDisplay.tsx
+// File: /src/components/WeatherDisplay/WeatherDisplay.tsx
 
-import { WeatherData } from "@/types";
+import { WeatherData } from "@/utils/api";
 import React from "react";
-import { FaHeart, FaRegHeart } from "react-icons/fa"; // Import heart icons
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 interface CurrentWeatherProps {
   weather: WeatherData | null;
-  isFavorite: boolean; // New prop to indicate if current location is favorite
-  onToggleFavorite: () => void; // New prop for toggling favorite
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
 }
 
 const CurrentWeather: React.FC<CurrentWeatherProps> = ({
@@ -15,9 +15,11 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
   isFavorite,
   onToggleFavorite,
 }) => {
+  if (!weather) return null;
+
   return (
-    <div className="current-weather flex flex-col items-center justify-center">
-      {/* Heart Icon */}
+    <div className="current-weather flex flex-col items-center justify-center relative">
+      {/* Favorite Icon */}
       <div
         className="favorite-icon absolute top-4 right-4 cursor-pointer text-red-500"
         onClick={onToggleFavorite}
@@ -26,25 +28,31 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
         {isFavorite ? <FaHeart size={24} /> : <FaRegHeart size={24} />}
       </div>
 
-      <div className="weather-icon text-8xl">
-        {/* Replace with appropriate weather icon based on conditions */}
-        ☀️
-      </div>
+      {/* Weather Icon */}
+      <img src={weather.icon} alt="Weather Icon" className="weather-icon text-8xl" />
+
+      {/* Temperature */}
       <h1 className="temperature text-8xl font-bold mt-4">
-        {weather?.temperature}°{weather?.unit}
+        {weather.temperature}°{weather.unit}
       </h1>
+
+      {/* Date and Time */}
       <p className="date-time text-2xl mt-2">
-        {new Date().toLocaleString("en-US", {
+        {new Date(weather.dt * 1000).toLocaleString(undefined, {
           weekday: "long",
           hour: "numeric",
           minute: "numeric",
         })}
       </p>
+
+      {/* Weather Description */}
       <div className="conditions flex items-center mt-4">
-        <p className="description mr-2">{weather?.description}</p>
-        <p className="rain-chance">Rain - {weather?.rainChance}%</p>
+        <p className="description mr-2 capitalize">{weather.description}</p>
+        <p className="rain-chance">Precipitation: {weather.rainChance}%</p>
       </div>
-      <p className="location mt-4">{weather?.city}</p>
+
+      {/* Location */}
+      <p className="location mt-4 text-xl font-semibold">{weather.city}</p>
     </div>
   );
 };

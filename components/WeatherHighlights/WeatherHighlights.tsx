@@ -1,15 +1,7 @@
-import React from "react";
+// File: /src/components/WeatherHighlights/WeatherHighlights.tsx
 
-interface HighlightsData {
-  uvIndex: number;
-  windSpeed: number;
-  windDirection: string;
-  sunrise: string;
-  sunset: string;
-  humidity: number;
-  visibility: number;
-  airQuality: number;
-}
+import React from "react";
+import { HighlightsData } from "@/types";
 
 interface WeatherHighlightsProps {
   highlights: HighlightsData;
@@ -19,38 +11,55 @@ const WeatherHighlights: React.FC<WeatherHighlightsProps> = ({ highlights }) => 
   return (
     <div className="weather-highlights mt-8">
       <h2 className="text-2xl font-bold mb-4">Today&apos;s Highlights</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="highlight-card p-4 bg-white rounded-lg shadow">
-          <h3>UV Index</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* UV Index */}
+        <div className="highlight-card p-4 bg-white rounded-lg shadow flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold">UV Index</h3>
+            <p className="text-sm">Low to Moderate</p>
+          </div>
           <div className="uv-meter">
-            {/* Implement UV meter visualization */}
             <span className="text-3xl">{highlights.uvIndex}</span>
           </div>
         </div>
-        <div className="highlight-card p-4 bg-white rounded-lg shadow">
-          <h3>Wind Status</h3>
-          <p className="text-3xl">{highlights.windSpeed} km/h</p>
-          <p>{highlights.windDirection}</p>
+
+        {/* Wind Status */}
+        <div className="highlight-card p-4 bg-white rounded-lg shadow flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold">Wind Status</h3>
+            <p className="text-sm">Wind Direction</p>
+          </div>
+          <div className="wind-info text-3xl">
+            {highlights.windSpeed} km/h
+            <span className="text-sm ml-2">{highlights.windDirection}</span>
+          </div>
         </div>
-        <div className="highlight-card p-4 bg-white rounded-lg shadow">
-          <h3>Sunrise & Sunset</h3>
-          <p>🌅 {highlights.sunrise}</p>
-          <p>🌇 {highlights.sunset}</p>
+
+        {/* Sunrise & Sunset */}
+        <div className="highlight-card p-4 bg-white rounded-lg shadow flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold">Sunrise & Sunset</h3>
+          </div>
+          <div className="sun-times text-sm">
+            <p>🌅 {highlights.sunrise}</p>
+            <p>🌇 {highlights.sunset}</p>
+          </div>
         </div>
-        <div className="highlight-card p-4 bg-white rounded-lg shadow">
-          <h3>Humidity</h3>
-          <p className="text-3xl">{highlights.humidity}%</p>
-          <p>Normal 👍</p>
+
+        {/* Humidity */}
+        <div className="highlight-card p-4 bg-white rounded-lg shadow flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold">Humidity</h3>
+          </div>
+          <div className="humidity text-3xl">{highlights.humidity}%</div>
         </div>
-        <div className="highlight-card p-4 bg-white rounded-lg shadow">
-          <h3>Visibility</h3>
-          <p className="text-3xl">{highlights.visibility} km</p>
-          <p>Average 😐</p>
-        </div>
-        <div className="highlight-card p-4 bg-white rounded-lg shadow">
-          <h3>Air Quality</h3>
-          <p className="text-3xl">{highlights.airQuality}</p>
-          <p>Unhealthy 👎</p>
+
+        {/* Visibility */}
+        <div className="highlight-card p-4 bg-white rounded-lg shadow flex justify-between items-center">
+          <div>
+            <h3 className="text-lg font-semibold">Visibility</h3>
+          </div>
+          <div className="visibility text-3xl">{highlights.visibility} km</div>
         </div>
       </div>
     </div>
