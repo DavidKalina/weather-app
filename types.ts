@@ -95,6 +95,7 @@ export interface Daily {
 }
 
 export interface WeatherAPIResponse {
+  city: string;
   lat: number;
   lon: number;
   timezone: string;

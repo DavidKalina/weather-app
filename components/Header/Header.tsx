@@ -7,6 +7,7 @@ import { FavoriteLocation } from "@/types";
 
 interface HeaderProps {
   onSearch: (coords?: { latitude: number; longitude: number }) => void;
+  onAddressChange: (addy: string) => void;
   onUnitToggle: () => void;
   unit: "C" | "F";
   favorites: FavoriteLocation[];
@@ -15,6 +16,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({
   onSearch,
+  onAddressChange,
   onUnitToggle,
   unit,
   favorites,
@@ -23,7 +25,10 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="flex justify-between items-center">
       <div className="search-bar flex items-center">
-        <AddressToCoordinates onCoordinatesChange={(coords) => onSearch(coords)} />
+        <AddressToCoordinates
+          onCoordinatesChange={(coords) => onSearch(coords)}
+          onAddressChange={(addy) => onAddressChange(addy)}
+        />
         <button
           className="bg-gray-200 p-2 rounded-r-lg ml-2"
           onClick={() => onSearch()}

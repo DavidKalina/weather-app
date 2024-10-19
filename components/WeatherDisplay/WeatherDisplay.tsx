@@ -5,6 +5,7 @@ import React from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 interface CurrentWeatherProps {
+  address: string;
   weather: WeatherData | null;
   isFavorite: boolean;
   onToggleFavorite: () => void;
@@ -13,9 +14,14 @@ interface CurrentWeatherProps {
 const CurrentWeather: React.FC<CurrentWeatherProps> = ({
   weather,
   isFavorite,
+  address,
   onToggleFavorite,
 }) => {
   if (!weather) return null;
+
+  console.log({ address });
+
+  console.log(weather);
 
   return (
     <div className="current-weather flex flex-col items-center justify-center relative">
@@ -38,7 +44,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
 
       {/* Date and Time */}
       <p className="date-time text-2xl mt-2">
-        {new Date(weather.dt * 1000).toLocaleString(undefined, {
+        {new Date((weather?.dt ?? 0) * 1000).toLocaleString(undefined, {
           weekday: "long",
           hour: "numeric",
           minute: "numeric",
@@ -52,7 +58,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
       </div>
 
       {/* Location */}
-      <p className="location mt-4 text-xl font-semibold">{weather.city}</p>
+      <p className="location mt-4 text-xl font-semibold">{address}</p>
     </div>
   );
 };

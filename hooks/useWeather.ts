@@ -12,7 +12,7 @@ interface UseWeatherProps {
 const useWeather = ({ unit, coords }: UseWeatherProps) => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [forecast, setForecast] = useState<ForecastData[] | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleSearch = useCallback(
@@ -30,8 +30,11 @@ const useWeather = ({ unit, coords }: UseWeatherProps) => {
         // Fetch city name via reverse geocoding
 
         // Map API data to WeatherData
+
+        console.log(weatherAPIResponse);
+
         const mappedWeather: WeatherData = {
-          city: "Frederick",
+          city: weatherAPIResponse.city,
           temperature: Math.round(weatherAPIResponse.current.temp),
           unit,
           rainChance: weatherAPIResponse.hourly[0]?.pop * 100 || 0, // Example: using the first hourly pop

@@ -6,12 +6,15 @@ import { FavoriteLocation } from "@/types";
 const FAVORITES_STORAGE_KEY = "favorites";
 
 const useFavorites = () => {
-  const [favorites, setFavorites] = useState<FavoriteLocation[]>([]);
+  const [favorites, setFavorites] = useState<FavoriteLocation[]>([]); // Explicitly type the state
 
   // Load favorites from localStorage on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
+
+      console.log({ storedFavorites });
+
       if (storedFavorites) {
         try {
           setFavorites(JSON.parse(storedFavorites));
@@ -26,6 +29,9 @@ const useFavorites = () => {
   // Save favorites to localStorage whenever they change
   useEffect(() => {
     if (typeof window !== "undefined") {
+      if (!favorites.length) {
+        return;
+      }
       localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
     }
   }, [favorites]);
