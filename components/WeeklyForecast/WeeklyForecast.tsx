@@ -3,6 +3,7 @@
 import React from "react";
 import { ForecastData } from "@/types";
 import { motion } from "framer-motion";
+import { useDelayedHover } from "@/hooks/useDelayedHover";
 
 interface WeeklyForecastProps {
   forecast: ForecastData[] | null;
@@ -41,6 +42,8 @@ const cardVariants = {
 };
 
 const WeeklyForecast: React.FC<WeeklyForecastProps> = ({ forecast }) => {
+  const canHover = useDelayedHover(1500); // Delay hover by 1.5 seconds
+
   if (!forecast) return null;
 
   return (
@@ -58,9 +61,9 @@ const WeeklyForecast: React.FC<WeeklyForecastProps> = ({ forecast }) => {
         {forecast.map((day, index) => (
           <motion.div
             key={index}
-            className="day-forecast text-center bg-white p-4 rounded-lg shadow"
+            className="day-forecast text-center bg-white p-4 rounded-lg shadow cursor-pointer"
             variants={cardVariants}
-            // whileHover="hover"
+            whileHover={canHover ? "hover" : undefined}
           >
             <p className="date font-semibold">{day.date}</p>
             <img

@@ -3,6 +3,7 @@
 import React from "react";
 import { HighlightsData } from "@/types";
 import { motion } from "framer-motion";
+import { useDelayedHover } from "@/hooks/useDelayedHover";
 
 interface WeatherHighlightsProps {
   highlights: HighlightsData;
@@ -30,9 +31,19 @@ const cardVariants = {
       damping: 20,
     },
   },
+  hover: {
+    scale: 1.05, // Slightly enlarge the card
+    boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.2)", // Enhanced shadow
+    transition: {
+      duration: 0.3,
+      type: "spring",
+      stiffness: 300,
+    },
+  },
 };
 
 const WeatherHighlights: React.FC<WeatherHighlightsProps> = ({ highlights }) => {
+  const canHover = useDelayedHover(1500);
   return (
     <motion.div
       initial="hidden"
@@ -46,6 +57,7 @@ const WeatherHighlights: React.FC<WeatherHighlightsProps> = ({ highlights }) => 
         <motion.div
           className="highlight-card p-4 bg-white rounded-lg shadow flex justify-between items-center"
           variants={cardVariants}
+          whileHover={canHover ? "hover" : undefined}
         >
           <div>
             <h3 className="text-lg font-semibold">UV Index</h3>
@@ -60,6 +72,7 @@ const WeatherHighlights: React.FC<WeatherHighlightsProps> = ({ highlights }) => 
         <motion.div
           className="highlight-card p-4 bg-white rounded-lg shadow flex justify-between items-center"
           variants={cardVariants}
+          whileHover={canHover ? "hover" : undefined}
         >
           <div>
             <h3 className="text-lg font-semibold">Wind Status</h3>
@@ -75,6 +88,7 @@ const WeatherHighlights: React.FC<WeatherHighlightsProps> = ({ highlights }) => 
         <motion.div
           className="highlight-card p-4 bg-white rounded-lg shadow flex justify-between items-center"
           variants={cardVariants}
+          whileHover={canHover ? "hover" : undefined}
         >
           <div>
             <h3 className="text-lg font-semibold">Sunrise & Sunset</h3>
@@ -89,6 +103,7 @@ const WeatherHighlights: React.FC<WeatherHighlightsProps> = ({ highlights }) => 
         <motion.div
           className="highlight-card p-4 bg-white rounded-lg shadow flex justify-between items-center"
           variants={cardVariants}
+          whileHover={canHover ? "hover" : undefined}
         >
           <div>
             <h3 className="text-lg font-semibold">Humidity</h3>
@@ -100,6 +115,7 @@ const WeatherHighlights: React.FC<WeatherHighlightsProps> = ({ highlights }) => 
         <motion.div
           className="highlight-card p-4 bg-white rounded-lg shadow flex justify-between items-center"
           variants={cardVariants}
+          whileHover={canHover ? "hover" : undefined}
         >
           <div>
             <h3 className="text-lg font-semibold">Visibility</h3>
