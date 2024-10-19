@@ -13,11 +13,16 @@ const Home: React.FC = () => {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [forecast, setForecast] = useState<ForecastData[] | null>(null);
   const [unit, setUnit] = useState<"C" | "F">("C");
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentCoords, setCurrentCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   const handleSearch = useCallback(
     async (coords: { latitude: number; longitude: number }) => {
+      setCurrentCoords(coords);
       setLoading(true);
       setError(null);
       try {
@@ -27,8 +32,11 @@ const Home: React.FC = () => {
         setForecast(forecastData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unexpected error occurred");
+      } finally {
+        setTimeout(() => {
+          setLoading(false);
+        }, 400);
       }
-      setLoading(false);
     },
     [unit]
   );
@@ -36,6 +44,12 @@ const Home: React.FC = () => {
   const handleUnitToggle = () => {
     setUnit((prevUnit) => (prevUnit === "C" ? "F" : "C"));
   };
+
+  useEffect(() => {
+    if (currentCoords) {
+      handleSearch(currentCoords);
+    }
+  }, [unit, currentCoords, handleSearch]);
 
   const getCurrentLocation = (): Promise<{ latitude: number; longitude: number }> => {
     return new Promise((resolve, reject) => {
@@ -78,13 +92,17 @@ const Home: React.FC = () => {
   return (
     <div className="weather-app bg-gray-100 min-h-screen p-10 flex flex-col gap-4">
       <Header onSearch={handleSearch} onUnitToggle={handleUnitToggle} unit={unit} />
-      <div className="content-wrapper flex gap-4">
-        <div className="left-panel w-1/3 bg-white p-8 rounded-lg shadow">
-          <CurrentWeather weather={weather} />
-        </div>
-        <div className="right-panel w-2/3 p-0">
-          {!loading ? (
-            <>
+      <div className="content-wrapper flex gap-4 flex-1">
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center bo">
+            <LoadingSpinner />
+          </div>
+        ) : (
+          <>
+            <div className="left-panel w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center">
+              <CurrentWeather weather={weather} />
+            </div>
+            <div className="right-panel w-2/3 p-0">
               <WeeklyForecast forecast={forecast} />
               <WeatherHighlights
                 highlights={{
@@ -98,11 +116,9 @@ const Home: React.FC = () => {
                   airQuality: 105,
                 }}
               />
-            </>
-          ) : (
-            <LoadingSpinner />
-          )}
-        </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

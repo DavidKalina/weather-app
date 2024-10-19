@@ -6,14 +6,16 @@ interface CurrentWeatherProps {
 }
 
 const CurrentWeather: React.FC<CurrentWeatherProps> = ({ weather }) => {
-  console.log("Weather", weather);
+  console.log(weather);
   return (
-    <div className="current-weather flex flex-col items-center">
-      <div className="weather-icon text-9xl">
+    <div className="current-weather flex flex-col items-center justify-center">
+      <div className="weather-icon text-8xl">
         {/* Replace with appropriate weather icon based on conditions */}
         ☀️
       </div>
-      <h1 className="temperature text-8xl font-bold mt-4">{weather?.temperature}°C</h1>
+      <h1 className="temperature text-8xl font-bold mt-4">
+        {weather?.temperature}°{weather?.unit}
+      </h1>
       <p className="date-time text-2xl mt-2">
         {new Date().toLocaleString("en-US", {
           weekday: "long",

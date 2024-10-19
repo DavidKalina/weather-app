@@ -72,10 +72,7 @@ export async function fetchWeather(
 }
 
 export async function fetchForecast(
-  coords: {
-    latitude: number;
-    longitude: number;
-  },
+  coords: { latitude: number; longitude: number },
   unit: "C" | "F"
 ): Promise<ForecastData[]> {
   try {
@@ -89,17 +86,24 @@ export async function fetchForecast(
     });
 
     const { data } = response;
+    const dailyForecasts: { [key: string]: ForecastData } = {};
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return data.list.slice(0, 5).map((item: any) => ({
-      date: new Date(item.dt * 1000).toLocaleDateString(),
-      temperature: Math.round(item.main.temp),
-      description: item.weather[0].description,
-      icon: `http://openweathermap.org/img/wn/${item.weather[0].icon}.png`,
-    }));
+    data.list.forEach((item: any) => {
+      const date = new Date(item.dt * 1000).toLocaleDateString();
+      if (!dailyForecasts[date] || item.main.temp > dailyForecasts[date].temperature) {
+        dailyForecasts[date] = {
+          date,
+          temperature: Math.round(item.main.temp),
+          description: item.weather[0].description,
+          icon: `http://openweathermap.org/img/wn/${item.weather[0].icon}.png`,
+        };
+      }
+    });
+
+    return Object.values(dailyForecasts);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("Location not found")) {
-      throw error;
-    }
+    console.error("Error fetching forecast data:", error);
     throw new Error("Failed to fetch forecast data. Please try again.");
   }
 }

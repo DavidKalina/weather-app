@@ -24,6 +24,7 @@ const AddressInput: React.FC<AddressInputProps> = ({
         }}
         value={address}
         style={{
+          padding: 8,
           width: "100%",
           color: "#000",
           fontFamily: "BungeeInline",

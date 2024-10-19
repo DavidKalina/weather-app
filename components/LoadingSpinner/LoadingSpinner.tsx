@@ -1,9 +1,5 @@
-import "./LoadingSpinner.css";
+import { SkewLoader } from "react-spinners";
 
 export default function LoadingSpinner() {
-  return (
-    <div className="loading-spinner">
-      <div className="spinner"></div>
-    </div>
-  );
+  return <SkewLoader />;
 }

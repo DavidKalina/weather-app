@@ -32,9 +32,6 @@ const Header: React.FC<HeaderProps> = ({ onSearch, onUnitToggle, unit }) => {
           °F
         </button>
       </div>
-      <div className="user-profile">
-        <img src="/path-to-user-image.jpg" alt="User" className="w-10 h-10 rounded-full" />
-      </div>
     </header>
   );
 };
