@@ -58,9 +58,16 @@ const Home: React.FC = () => {
   useEffect(() => {
     if (favorites.length > 0) {
       const favorite = favorites[0];
+      setAddress(favorite.city);
       handleSearch(favorite.coordinates);
     }
   }, [favorites]);
+
+  useEffect(() => {
+    if (weather?.coords?.lat && weather.coords.lon) {
+      handleSearch({ latitude: weather.coords.lat, longitude: weather.coords.lon });
+    }
+  }, [unit]);
 
   return (
     <div className="weather-app bg-gray-100 min-h-screen p-10 flex flex-col gap-4">

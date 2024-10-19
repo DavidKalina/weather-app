@@ -19,10 +19,6 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
 }) => {
   if (!weather) return null;
 
-  console.log({ address });
-
-  console.log(weather);
-
   return (
     <div className="current-weather flex flex-col items-center justify-center relative">
       {/* Favorite Icon */}
@@ -38,7 +34,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
       <img src={weather.icon} alt="Weather Icon" className="weather-icon text-8xl" />
 
       {/* Temperature */}
-      <h1 className="temperature text-8xl font-bold mt-4">
+      <h1 className="temperature text-4xl md:text-6xl font-bold mt-4">
         {weather.temperature}°{weather.unit}
       </h1>
 

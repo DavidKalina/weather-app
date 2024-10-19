@@ -76,7 +76,6 @@ const AddressToCoordinates: React.FC<AddressToCoordinatesProps> = ({
         onChangeAddress={(text) => {
           setFetch(true);
           setAddress(text);
-          onAddressChange?.(text);
           setHasStartedTyping(true); // User has started typing
         }}
         onClearAddress={() => {
