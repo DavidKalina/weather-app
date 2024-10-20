@@ -29,13 +29,6 @@ const Header: React.FC<HeaderProps> = ({
           onCoordinatesChange={(coords) => onSearch(coords)}
           onAddressChange={(addy) => onAddressChange(addy)}
         />
-        <button
-          className="bg-gray-200 p-2 rounded-r-lg ml-2"
-          onClick={() => onSearch()}
-          title="Use Current Location"
-        >
-          🔄
-        </button>
       </div>
       <div className="flex items-center gap-4">
         <FavoritesDropdown

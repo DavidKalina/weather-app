@@ -20,7 +20,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
   if (!weather) return null;
 
   return (
-    <div className="current-weather flex flex-col items-center justify-center relative">
+    <div className="current-weather flex flex-col items-center justify-center">
       {/* Favorite Icon */}
       <div
         className="favorite-icon absolute top-4 right-4 cursor-pointer text-red-500"

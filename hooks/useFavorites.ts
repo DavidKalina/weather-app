@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FavoriteLocation } from "@/types";
+import { toast } from "sonner";
 
 const FAVORITES_STORAGE_KEY = "favorites";
 
@@ -70,7 +71,9 @@ const useFavorites = () => {
     );
     if (exists) {
       removeFavorite(favorite);
+      toast.warning(`${favorite.city} Removed!`);
     } else {
+      toast.success(`${favorite.city} Saved`);
       addFavorite(favorite);
     }
   };
