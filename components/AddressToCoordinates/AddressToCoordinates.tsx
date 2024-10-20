@@ -12,13 +12,15 @@ export interface Suggestion {
 export interface AddressToCoordinatesProps {
   initialAddress?: string;
   onCoordinatesChange: (coordinates: { latitude: number; longitude: number }) => void;
-  onAddressChange?: (address: string) => void;
+  onAddressChange: (address: string) => void;
+  onAddressUpdate: (address: string) => void; // New prop
 }
 
 const AddressToCoordinates: React.FC<AddressToCoordinatesProps> = ({
   initialAddress = "",
   onCoordinatesChange,
   onAddressChange,
+  onAddressUpdate,
 }) => {
   const [address, setAddress] = useState<string>(initialAddress);
   const [coordinates, setCoordinates] = useState<{ latitude: number; longitude: number } | null>(
@@ -36,7 +38,7 @@ const AddressToCoordinates: React.FC<AddressToCoordinatesProps> = ({
 
   useEffect(() => {
     setAddress(initialAddress);
-    setSuggestions([]); // Clear suggestions if there's an initial address
+    setSuggestions([]); // Clear suggestions when initialAddress changes
   }, [initialAddress, setSuggestions]);
 
   const handleCoordinatesChange = useCallback(
@@ -64,7 +66,7 @@ const AddressToCoordinates: React.FC<AddressToCoordinatesProps> = ({
     setFetch(false);
     handleCoordinatesChange({ latitude, longitude });
     setAddress(suggestion.place_name);
-    onAddressChange?.(suggestion.place_name);
+    onAddressUpdate(suggestion.place_name); // Use onAddressUpdate instead of onAddressChange
     setSuggestions([]);
     setError("");
   };
@@ -76,17 +78,17 @@ const AddressToCoordinates: React.FC<AddressToCoordinatesProps> = ({
         onChangeAddress={(text) => {
           setFetch(true);
           setAddress(text);
-          onAddressChange?.(text);
-          setHasStartedTyping(true); // User has started typing
+          onAddressChange(text); // Use onAddressChange for input changes
+          setHasStartedTyping(true);
         }}
         onClearAddress={() => {
           setFetch(true);
           setAddress("");
-          onAddressChange?.("");
+          onAddressChange(""); // Use onAddressChange when clearing the input
           setSuggestions([]);
           setError("");
           setCoordinates(null);
-          setHasStartedTyping(false); // Reset typing state
+          setHasStartedTyping(false);
         }}
       />
 

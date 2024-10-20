@@ -1,9 +1,9 @@
-import { Favorite } from "@/types";
+import { FavoriteLocation } from "@/types";
 import React from "react";
 
 interface FavoritesListProps {
-  favorites: Favorite[];
-  onSelectFavorite: (city: string, unit: "C" | "F") => void;
+  favorites: FavoriteLocation[];
+  onSelectFavorite: (fav: FavoriteLocation) => void;
 }
 
 const FavoritesList: React.FC<FavoritesListProps> = ({ favorites, onSelectFavorite }) => {
@@ -14,10 +14,8 @@ const FavoritesList: React.FC<FavoritesListProps> = ({ favorites, onSelectFavori
       <h3>Favorites</h3>
       <ul>
         {favorites.map((fav, index) => (
-          <li key={index}>
-            <button onClick={() => onSelectFavorite(fav.city, fav.unit)}>
-              {fav.city} ({fav.unit}°)
-            </button>
+          <li key={`${fav.coordinates.latitude}-${fav.coordinates.longitude}`}>
+            <button onClick={() => onSelectFavorite(fav)}>{fav.city}</button>
           </li>
         ))}
       </ul>

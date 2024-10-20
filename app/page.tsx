@@ -4,187 +4,176 @@
 
 import Header from "@/components/Header/Header";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { ForecastData, WeatherData, FavoriteLocation } from "@/types";
-import React, { useCallback, useEffect, useState } from "react";
-import CurrentWeather from "../components/WeatherDisplay";
-import WeatherHighlights from "../components/WeatherHighlights";
-import WeeklyForecast from "../components/WeeklyForecast";
-import { fetchForecast, fetchWeather } from "../utils/api";
+import ReverseGeocoding from "@/components/ReverseGeocoding";
+import CurrentWeather from "@/components/WeatherDisplay/WeatherDisplay";
+import WeatherHighlights from "@/components/WeatherHighlights/WeatherHighlights";
+import WeeklyForecast from "@/components/WeeklyForecast/WeeklyForecast";
+import useFavorites from "@/hooks/useFavorites";
+import useGeolocation from "@/hooks/useGeolocation";
+import useWeather from "@/hooks/useWeather";
+import { FavoriteLocation } from "@/types";
+import { getWindDirection } from "@/utils/getWindDirection";
+import React, { useEffect, useRef, useState } from "react";
+import { toast, Toaster } from "sonner";
 
 const Home: React.FC = () => {
-  const [weather, setWeather] = useState<WeatherData | null>(null);
-  const [forecast, setForecast] = useState<ForecastData[] | null>(null);
+  // Manage unit state
   const [unit, setUnit] = useState<"C" | "F">("C");
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentCoords, setCurrentCoords] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const lastToastedUnit = useRef<"C" | "F">("C");
 
-  // Initialize favorites state with data from localStorage
-  const [favorites, setFavorites] = useState<FavoriteLocation[]>(() => {
-    if (typeof window !== "undefined") {
-      const storedFavorites = localStorage.getItem("favorites");
-      return storedFavorites ? JSON.parse(storedFavorites) : [];
-    }
-    return [];
+  const isInitialMount = useRef(true);
+
+  const [addressState, setAddressState] = useState("");
+  const [inputValue, setInputValue] = useState("");
+
+  // Custom hooks
+  const { favorites, toggleFavorite } = useFavorites();
+  const { weather, forecast, loading, error, handleSearch } = useWeather({
+    unit,
+    coords: null, // Initially null; will be set based on geolocation or favorites
   });
 
-  // Save favorites to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-  }, [favorites]);
+  const { coords, loading: geoLoading } = useGeolocation();
 
-  const handleSearch = useCallback(
-    async (coords: { latitude: number; longitude: number }, cityName?: string) => {
-      setCurrentCoords(coords);
-      setLoading(true);
-      setError(null);
-      try {
-        const weatherData = await fetchWeather(coords, unit);
-        setWeather(weatherData);
-        const forecastData = await fetchForecast(coords, unit);
-        setForecast(forecastData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unexpected error occurred");
-      } finally {
-        // Added a delay for better UX
-        setTimeout(() => {
-          setLoading(false);
-        }, 400);
-      }
-    },
-    [unit]
-  );
+  const address = useRef("");
 
-  const handleUnitToggle = () => {
-    setUnit((prevUnit) => (prevUnit === "C" ? "F" : "C"));
+  const onAddressChange = (addy: string) => {
+    setInputValue(addy);
   };
 
-  // Function to get user's current location
-  const getCurrentLocation = (): Promise<{ latitude: number; longitude: number }> => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error("Geolocation is not supported by your browser"));
-      } else {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            resolve({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            });
-          },
-          (error) => {
-            reject(error);
-          }
-        );
+  const onAddressUpdate = (addy: string) => {
+    setAddressState(addy);
+    setInputValue(addy);
+  };
+
+  const handleUnitToggle = () => {
+    setUnit((prevUnit) => {
+      const newUnit = prevUnit === "C" ? "F" : "C";
+      if (lastToastedUnit.current !== newUnit) {
+        lastToastedUnit.current = newUnit;
+        toast.success(`Unit changed to ${newUnit === "C" ? "Celsius" : "Fahrenheit"}!`);
       }
+      return newUnit;
     });
   };
 
-  // Fetch initial data based on favorites or current location
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        if (favorites.length > 0) {
-          // If there are favorites, fetch data for the first favorite
-          const firstFavorite = favorites[0];
-          await handleSearch(firstFavorite.coordinates, firstFavorite.city);
-        } else {
-          // Otherwise, use the user's current location
-          const coords = await getCurrentLocation();
-          await handleSearch(coords);
-        }
-      } catch (error) {
-        console.error("Error fetching initial data:", error);
-        // Fallback to a default location if fetching fails
-        await handleSearch({ latitude: 40.7128, longitude: -74.006 }, "New York City"); // New York City coordinates
-      } finally {
-        setLoading(false);
-      }
+  // Handle favorite toggling
+  const handleToggleFavorite = () => {
+    if (!weather) return;
+
+    const currentFavorite: FavoriteLocation = {
+      city: addressState,
+      coordinates: {
+        latitude: weather.coords?.lat || 0,
+        longitude: weather.coords?.lon || 0,
+      },
     };
 
-    fetchInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
-
-  if (error) return <div>Error: {error}</div>;
-
-  // Check if current location is a favorite
-  const isFavorite = favorites.some(
-    (fav) =>
-      fav.coordinates.latitude === currentCoords?.latitude &&
-      fav.coordinates.longitude === currentCoords?.longitude
-  );
-
-  // Function to toggle favorite
-  const toggleFavorite = () => {
-    if (!currentCoords || !weather) return;
-
-    if (isFavorite) {
-      // Remove from favorites
-      setFavorites((prevFavorites) =>
-        prevFavorites.filter(
-          (fav) =>
-            fav.coordinates.latitude !== currentCoords.latitude ||
-            fav.coordinates.longitude !== currentCoords.longitude
-        )
-      );
-    } else {
-      // Add to favorites
-      const newFavorite: FavoriteLocation = {
-        city: weather.city,
-        coordinates: { ...currentCoords },
-      };
-      setFavorites((prevFavorites) => [...prevFavorites, newFavorite]);
-    }
+    toggleFavorite(currentFavorite);
   };
 
+  const handleSelectFavorite = async (fav: FavoriteLocation) => {
+    setAddressState(fav.city);
+    setInputValue(""); // Clear the input value when a favorite is selected
+    await handleSearch({
+      latitude: fav.coordinates.latitude,
+      longitude: fav.coordinates.longitude,
+    });
+  };
+
+  useEffect(() => {
+    if (isInitialMount.current) {
+      if (favorites.length > 0) {
+        const favorite = favorites[0];
+        address.current = favorite.city;
+        setAddressState(favorite.city); // Set the address state
+        handleSelectFavorite(favorite);
+        isInitialMount.current = false;
+      } else {
+        if (!geoLoading && coords) {
+          handleSearch(coords);
+        }
+      }
+    }
+  }, [favorites, geoLoading, coords]);
+
+  useEffect(() => {
+    if (weather?.coords?.lat && weather.coords.lon) {
+      handleSearch({ latitude: weather.coords.lat, longitude: weather.coords.lon });
+    }
+  }, [unit]);
+
   return (
-    <div className="weather-app bg-gray-100 min-h-screen p-10 flex flex-col gap-4">
-      <Header
-        onSearch={handleSearch}
-        onUnitToggle={handleUnitToggle}
-        unit={unit}
-        favorites={favorites}
-        onSelectFavorite={(fav: FavoriteLocation) => handleSearch(fav.coordinates, fav.city)}
-      />
-      <div className="content-wrapper flex flex-col md:flex-row gap-4 flex-1">
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <LoadingSpinner />
-          </div>
-        ) : (
-          <>
-            <div className="left-panel w-full md:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center relative">
-              <CurrentWeather
-                weather={weather}
-                isFavorite={isFavorite}
-                onToggleFavorite={toggleFavorite}
-              />
+    <>
+      <div className="weather-app bg-gray-100 min-h-screen p-10 flex flex-col gap-4">
+        <Header
+          inputValue={inputValue}
+          onAddressChange={onAddressChange}
+          onAddressUpdate={onAddressUpdate}
+          onSearch={handleSearch}
+          onUnitToggle={handleUnitToggle}
+          unit={unit}
+          favorites={favorites}
+          onSelectFavorite={handleSelectFavorite}
+        />
+        <div className="content-wrapper flex flex-col lg:flex-row gap-4 flex-1">
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <LoadingSpinner />
             </div>
-            <div className="right-panel w-full md:w-2/3 p-0 flex flex-col justify-between">
-              <WeeklyForecast forecast={forecast} />
-              <WeatherHighlights
-                highlights={{
-                  uvIndex: 5,
-                  windSpeed: 7.7,
-                  windDirection: "WSW",
-                  sunrise: "6:35 AM",
-                  sunset: "5:42 PM",
-                  humidity: 12,
-                  visibility: 5.2,
-                  airQuality: 105,
-                }}
-              />
-            </div>
-          </>
-        )}
+          ) : error ? (
+            <div className="flex-1 flex items-center justify-center text-red-500">{error}</div>
+          ) : (
+            <>
+              <div className="left-panel w-full lg:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center relative">
+                <CurrentWeather
+                  address={addressState || address.current}
+                  weather={weather}
+                  isFavorite={
+                    weather?.coords
+                      ? favorites.some(
+                          (fav) =>
+                            fav.coordinates.latitude === weather?.coords?.lat ||
+                            (0 && fav.coordinates.longitude === weather?.coords?.lon) ||
+                            0
+                        )
+                      : false
+                  }
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              </div>
+              <div className="right-panel w-full lg:w-2/3 p-0 flex flex-col justify-between">
+                <WeeklyForecast forecast={forecast} />
+                <WeatherHighlights
+                  highlights={{
+                    uvIndex: weather?.uvi || 0,
+                    windSpeed: weather?.windSpeed || 0,
+                    windDirection: weather?.windDeg ? getWindDirection(weather.windDeg) : "N/A",
+                    sunrise: weather?.sunrise || "",
+                    sunset: weather?.sunset || "",
+                    humidity: weather?.humidity || 0,
+                    visibility: weather?.visibility || 0, // Already in km
+                  }}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+      {coords?.latitude && coords.longitude && (
+        <ReverseGeocoding
+          onAddressChange={(addy) => {
+            setAddressState(addy);
+            // setInputValue(addy);
+          }}
+          location={{
+            latitude: coords?.latitude,
+            longitude: coords?.longitude,
+          }}
+        />
+      )}
+      <Toaster position="top-center" richColors theme="light" />{" "}
+    </>
   );
 };
 

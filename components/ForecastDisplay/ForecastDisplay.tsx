@@ -13,8 +13,8 @@ const ForecastDisplay: React.FC<ForecastDisplayProps> = ({ forecast, unit }) => 
     <div className="forecast-display">
       <h3>5-Day Forecast</h3>
       <div className="forecast-list">
-        {forecast.map((day, index) => (
-          <div key={index} className="forecast-item">
+        {forecast.map((day) => (
+          <div key={day.date} className="forecast-item">
             <p>{day.date}</p>
             <img src={day.icon} alt="Weather icon" className="weather-icon-small" />
             <p>
