@@ -13,7 +13,7 @@ const FavoritesList: React.FC<FavoritesListProps> = ({ favorites, onSelectFavori
     <div className="favorites-list">
       <h3>Favorites</h3>
       <ul>
-        {favorites.map((fav, index) => (
+        {favorites.map((fav) => (
           <li key={`${fav.coordinates.latitude}-${fav.coordinates.longitude}`}>
             <button onClick={() => onSelectFavorite(fav)}>{fav.city}</button>
           </li>

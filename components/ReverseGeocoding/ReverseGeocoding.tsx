@@ -7,8 +7,7 @@ interface ReverseGeocodingProps {
 }
 
 const ReverseGeocoding: React.FC<ReverseGeocodingProps> = ({ location, onAddressChange }) => {
-  const { placeInfo, isLoading } = useFetchAddress(location.longitude, location.latitude);
-
+  const { placeInfo } = useFetchAddress(location.longitude, location.latitude);
 
   useEffect(() => {
     if (onAddressChange) {

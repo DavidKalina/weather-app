@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { FavoriteLocation } from "@/types";
-import { FaChevronDown, FaTimes } from "react-icons/fa";
+import { FaChevronDown } from "react-icons/fa";
 
 interface FavoritesDropdownProps {
   favorites: FavoriteLocation[];
