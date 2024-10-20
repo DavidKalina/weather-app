@@ -1,5 +1,3 @@
-// File: /src/components/Header/Header.tsx
-
 import React from "react";
 import AddressToCoordinates from "../AddressToCoordinates/AddressToCoordinates";
 import FavoritesDropdown from "../FavoritesDropdown/FavoritesDropdown";
@@ -12,6 +10,7 @@ interface HeaderProps {
   unit: "C" | "F";
   favorites: FavoriteLocation[];
   onSelectFavorite: (fav: FavoriteLocation) => void;
+  inputValue: string;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -21,21 +20,19 @@ const Header: React.FC<HeaderProps> = ({
   unit,
   favorites,
   onSelectFavorite,
+  inputValue,
 }) => {
   return (
     <header className="flex flex-col gap-4 md:gap-0 md:flex-row justify-between items-center">
       <div className="search-bar flex items-center">
         <AddressToCoordinates
+          initialAddress={inputValue}
           onCoordinatesChange={(coords) => onSearch(coords)}
           onAddressChange={(addy) => onAddressChange(addy)}
         />
       </div>
       <div className="flex items-center gap-4">
-        <FavoritesDropdown
-          favorites={favorites}
-          onSelectFavorite={onSelectFavorite}
-          // onRemoveFavorite={() => {}} // Implement if removal is handled within the dropdown
-        />
+        <FavoritesDropdown favorites={favorites} onSelectFavorite={onSelectFavorite} />
         <div className="unit-toggle flex">
           <button
             className={`px-2 py-1 rounded-l-lg ${

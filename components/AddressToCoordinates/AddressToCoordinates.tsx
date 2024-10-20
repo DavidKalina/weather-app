@@ -36,7 +36,7 @@ const AddressToCoordinates: React.FC<AddressToCoordinatesProps> = ({
 
   useEffect(() => {
     setAddress(initialAddress);
-    setSuggestions([]); // Clear suggestions if there's an initial address
+    setSuggestions([]); // Clear suggestions when initialAddress changes
   }, [initialAddress, setSuggestions]);
 
   const handleCoordinatesChange = useCallback(

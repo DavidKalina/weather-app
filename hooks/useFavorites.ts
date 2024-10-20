@@ -14,8 +14,6 @@ const useFavorites = () => {
     if (typeof window !== "undefined") {
       const storedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
 
-      console.log({ storedFavorites });
-
       if (storedFavorites) {
         try {
           setFavorites(JSON.parse(storedFavorites));
@@ -33,7 +31,6 @@ const useFavorites = () => {
       if (!favorites.length) {
         return;
       }
-      console.log(favorites);
       localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
     }
   }, [favorites]);

@@ -46,7 +46,6 @@ export const useFetchAddress = (longitude: number | null, latitude: number | nul
 
         const feature = response.data.features[2];
 
-        console.log("FEATURES", response.data.features);
         const newPlaceInfo: PlaceInfo = {
           address: feature?.place_name || "Address not found",
           pointOfInterest: feature?.text,

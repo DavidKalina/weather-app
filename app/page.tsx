@@ -24,6 +24,7 @@ const Home: React.FC = () => {
   const isInitialMount = useRef(true);
 
   const [addressState, setAddressState] = useState("");
+  const [inputValue, setInputValue] = useState("");
 
   // Custom hooks
   const { favorites, toggleFavorite } = useFavorites();
@@ -59,14 +60,12 @@ const Home: React.FC = () => {
       },
     };
 
-    console.log(currentFavorite);
-
     toggleFavorite(currentFavorite);
   };
 
   const handleSelectFavorite = async (fav: FavoriteLocation) => {
-    address.current = fav.city;
-    setAddressState(fav.city); // Set the address state
+    setAddressState(fav.city);
+    setInputValue(""); // Clear the input value when a favorite is selected
     await handleSearch({
       latitude: fav.coordinates.latitude,
       longitude: fav.coordinates.longitude,
@@ -91,7 +90,9 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     if (weather?.coords?.lat && weather.coords.lon) {
-      handleSearch({ latitude: weather.coords.lat, longitude: weather.coords.lon });
+      if (lastToastedUnit.current !== unit) {
+        handleSearch({ latitude: weather.coords.lat, longitude: weather.coords.lon });
+      }
     }
   }, [unit]);
 
@@ -99,11 +100,10 @@ const Home: React.FC = () => {
     <>
       <div className="weather-app bg-gray-100 min-h-screen p-10 flex flex-col gap-4">
         <Header
+          inputValue={inputValue}
           onAddressChange={(addy) => {
-            if (addy) {
-              setAddressState(addy);
-              address.current = addy;
-            }
+            setInputValue(addy);
+            setAddressState(addy);
           }}
           onSearch={handleSearch}
           onUnitToggle={handleUnitToggle}
@@ -122,7 +122,7 @@ const Home: React.FC = () => {
             <>
               <div className="left-panel w-full md:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center relative">
                 <CurrentWeather
-                  address={addressState}
+                  address={addressState || address.current}
                   weather={weather}
                   isFavorite={
                     weather?.coords
@@ -158,8 +158,8 @@ const Home: React.FC = () => {
       {coords?.latitude && coords.longitude && (
         <ReverseGeocoding
           onAddressChange={(addy) => {
-            console.log({ addy });
             setAddressState(addy);
+            // setInputValue(addy);
           }}
           location={{
             latitude: coords?.latitude,
