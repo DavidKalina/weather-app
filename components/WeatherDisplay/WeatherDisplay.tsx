@@ -18,16 +18,6 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
   address,
   onToggleFavorite,
 }) => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2, // Delay between each child animation
-      },
-    },
-  };
-
   const cardVariants = {
     hidden: { opacity: 0, x: -50, y: 50 },
     visible: {
