@@ -31,8 +31,6 @@ const useWeather = ({ unit, coords }: UseWeatherProps) => {
 
         // Map API data to WeatherData
 
-        console.log(weatherAPIResponse);
-
         const mappedWeather: WeatherData = {
           city: weatherAPIResponse.city,
           temperature: Math.round(weatherAPIResponse.current.temp),

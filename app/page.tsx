@@ -4,34 +4,47 @@
 
 import Header from "@/components/Header/Header";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import ReverseGeocoding from "@/components/ReverseGeocoding";
 import CurrentWeather from "@/components/WeatherDisplay/WeatherDisplay";
 import WeatherHighlights from "@/components/WeatherHighlights/WeatherHighlights";
 import WeeklyForecast from "@/components/WeeklyForecast/WeeklyForecast";
 import useFavorites from "@/hooks/useFavorites";
+import useGeolocation from "@/hooks/useGeolocation";
 import useWeather from "@/hooks/useWeather";
 import { FavoriteLocation } from "@/types";
 import { getWindDirection } from "@/utils/getWindDirection";
 import React, { useEffect, useRef, useState } from "react";
-import { Toaster } from "sonner";
+import { toast, Toaster } from "sonner";
 
 const Home: React.FC = () => {
   // Manage unit state
   const [unit, setUnit] = useState<"C" | "F">("C");
+  const lastToastedUnit = useRef<"C" | "F">("C");
 
   const isInitialMount = useRef(true);
 
+  const [addressState, setAddressState] = useState("");
+
   // Custom hooks
-  const { favorites, toggleFavorite, removeFavorite } = useFavorites();
+  const { favorites, toggleFavorite } = useFavorites();
   const { weather, forecast, loading, error, handleSearch } = useWeather({
     unit,
     coords: null, // Initially null; will be set based on geolocation or favorites
   });
 
-  const [address, setAddress] = useState<string>("");
+  const { coords, loading: geoLoading } = useGeolocation();
 
-  // Handle unit toggle
+  const address = useRef("");
+
   const handleUnitToggle = () => {
-    setUnit((prevUnit) => (prevUnit === "C" ? "F" : "C"));
+    setUnit((prevUnit) => {
+      const newUnit = prevUnit === "C" ? "F" : "C";
+      if (lastToastedUnit.current !== newUnit) {
+        lastToastedUnit.current = newUnit;
+        toast.success(`Unit changed to ${newUnit === "C" ? "Celsius" : "Fahrenheit"}!`);
+      }
+      return newUnit;
+    });
   };
 
   // Handle favorite toggling
@@ -39,19 +52,21 @@ const Home: React.FC = () => {
     if (!weather) return;
 
     const currentFavorite: FavoriteLocation = {
-      city: address,
+      city: addressState,
       coordinates: {
         latitude: weather.coords?.lat || 0,
         longitude: weather.coords?.lon || 0,
       },
     };
 
+    console.log(currentFavorite);
+
     toggleFavorite(currentFavorite);
   };
 
-  // Handle selecting a favorite
   const handleSelectFavorite = async (fav: FavoriteLocation) => {
-    setAddress(fav.city);
+    address.current = fav.city;
+    setAddressState(fav.city); // Set the address state
     await handleSearch({
       latitude: fav.coordinates.latitude,
       longitude: fav.coordinates.longitude,
@@ -62,14 +77,17 @@ const Home: React.FC = () => {
     if (isInitialMount.current) {
       if (favorites.length > 0) {
         const favorite = favorites[0];
-        setAddress(favorite.city);
-        handleSearch(favorite.coordinates);
+        address.current = favorite.city;
+        setAddressState(favorite.city); // Set the address state
+        handleSelectFavorite(favorite);
         isInitialMount.current = false;
+      } else {
+        if (!geoLoading && coords) {
+          handleSearch(coords);
+        }
       }
     }
-  }, [favorites]);
-
-  console.log(isInitialMount.current);
+  }, [favorites, geoLoading, coords]);
 
   useEffect(() => {
     if (weather?.coords?.lat && weather.coords.lon) {
@@ -81,7 +99,12 @@ const Home: React.FC = () => {
     <>
       <div className="weather-app bg-gray-100 min-h-screen p-10 flex flex-col gap-4">
         <Header
-          onAddressChange={setAddress}
+          onAddressChange={(addy) => {
+            if (addy) {
+              setAddressState(addy);
+              address.current = addy;
+            }
+          }}
           onSearch={handleSearch}
           onUnitToggle={handleUnitToggle}
           unit={unit}
@@ -99,7 +122,7 @@ const Home: React.FC = () => {
             <>
               <div className="left-panel w-full md:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center relative">
                 <CurrentWeather
-                  address={address}
+                  address={addressState}
                   weather={weather}
                   isFavorite={
                     weather?.coords
@@ -132,6 +155,18 @@ const Home: React.FC = () => {
           )}
         </div>
       </div>
+      {coords?.latitude && coords.longitude && (
+        <ReverseGeocoding
+          onAddressChange={(addy) => {
+            console.log({ addy });
+            setAddressState(addy);
+          }}
+          location={{
+            latitude: coords?.latitude,
+            longitude: coords?.longitude,
+          }}
+        />
+      )}
       <Toaster position="top-center" richColors theme="light" />{" "}
     </>
   );

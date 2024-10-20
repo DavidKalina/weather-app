@@ -33,6 +33,7 @@ const useFavorites = () => {
       if (!favorites.length) {
         return;
       }
+      console.log(favorites);
       localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
     }
   }, [favorites]);

@@ -1,6 +1,7 @@
 // File: /src/hooks/useUnit.ts
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 const UNIT_STORAGE_KEY = "temperature_unit";
 
@@ -28,7 +29,17 @@ const useUnit = (): {
   }, [unit]);
 
   const toggleUnit = () => {
-    setUnit((prevUnit) => (prevUnit === "C" ? "F" : "C"));
+    setUnit((prevUnit) => {
+      if (prevUnit === "C") {
+        toast.success("Unit changed to Fahrenheit!");
+        return "F";
+      }
+      if (prevUnit == "F") {
+        toast.success("Unit changed to Celsius!");
+        return "C";
+      }
+      return "F";
+    });
   };
 
   return { unit, toggleUnit };
