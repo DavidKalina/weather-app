@@ -6,6 +6,8 @@ import { toast } from "sonner";
 
 const FAVORITES_STORAGE_KEY = "favorites";
 
+const MAX_FAVORITES = 10;
+
 const useFavorites = () => {
   const [favorites, setFavorites] = useState<FavoriteLocation[]>([]); // Explicitly type the state
 
@@ -35,7 +37,6 @@ const useFavorites = () => {
     }
   }, [favorites]);
 
-  // Function to add a favorite
   const addFavorite = (favorite: FavoriteLocation) => {
     setFavorites((prevFavorites) => {
       // Prevent duplicates
@@ -45,6 +46,15 @@ const useFavorites = () => {
           fav.coordinates.longitude === favorite.coordinates.longitude
       );
       if (exists) return prevFavorites;
+
+      // Check if we've reached the maximum number of favorites
+      if (prevFavorites.length >= MAX_FAVORITES) {
+        toast.error(
+          `You can only have ${MAX_FAVORITES} favorites. Please remove one to add a new favorite.`
+        );
+        return prevFavorites;
+      }
+
       return [...prevFavorites, favorite];
     });
   };
@@ -59,8 +69,6 @@ const useFavorites = () => {
       )
     );
   };
-
-  // Function to toggle favorite
   const toggleFavorite = (favorite: FavoriteLocation) => {
     const exists = favorites.some(
       (fav) =>
@@ -71,8 +79,14 @@ const useFavorites = () => {
       removeFavorite(favorite);
       toast.warning(`${favorite.city} Removed!`);
     } else {
-      toast.success(`${favorite.city} Saved`);
-      addFavorite(favorite);
+      if (favorites.length >= MAX_FAVORITES) {
+        toast.error(
+          `You can only have ${MAX_FAVORITES} favorites. Please remove one to add a new favorite.`
+        );
+      } else {
+        addFavorite(favorite);
+        toast.success(`${favorite.city} Saved`);
+      }
     }
   };
 

@@ -37,6 +37,15 @@ const Home: React.FC = () => {
 
   const address = useRef("");
 
+  const onAddressChange = (addy: string) => {
+    setInputValue(addy);
+  };
+
+  const onAddressUpdate = (addy: string) => {
+    setAddressState(addy);
+    setInputValue(addy);
+  };
+
   const handleUnitToggle = () => {
     setUnit((prevUnit) => {
       const newUnit = prevUnit === "C" ? "F" : "C";
@@ -101,10 +110,8 @@ const Home: React.FC = () => {
       <div className="weather-app bg-gray-100 min-h-screen p-10 flex flex-col gap-4">
         <Header
           inputValue={inputValue}
-          onAddressChange={(addy) => {
-            setInputValue(addy);
-            setAddressState(addy);
-          }}
+          onAddressChange={onAddressChange}
+          onAddressUpdate={onAddressUpdate}
           onSearch={handleSearch}
           onUnitToggle={handleUnitToggle}
           unit={unit}

@@ -6,6 +6,8 @@ import { FavoriteLocation } from "@/types";
 interface HeaderProps {
   onSearch: (coords?: { latitude: number; longitude: number }) => void;
   onAddressChange: (addy: string) => void;
+  onAddressUpdate: (addy: string) => void; // New prop
+
   onUnitToggle: () => void;
   unit: "C" | "F";
   favorites: FavoriteLocation[];
@@ -16,6 +18,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({
   onSearch,
   onAddressChange,
+  onAddressUpdate,
   onUnitToggle,
   unit,
   favorites,
@@ -28,7 +31,8 @@ const Header: React.FC<HeaderProps> = ({
         <AddressToCoordinates
           initialAddress={inputValue}
           onCoordinatesChange={(coords) => onSearch(coords)}
-          onAddressChange={(addy) => onAddressChange(addy)}
+          onAddressChange={onAddressChange}
+          onAddressUpdate={onAddressUpdate} // New prop
         />
       </div>
       <div className="flex items-center gap-4">
