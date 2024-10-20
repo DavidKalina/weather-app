@@ -125,23 +125,21 @@ const Home: React.FC = () => {
             <div className="flex-1 flex items-center justify-center text-red-500">{error}</div>
           ) : (
             <>
-              <div className="left-panel w-full lg:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center relative">
-                <CurrentWeather
-                  address={addressState || address.current}
-                  weather={weather}
-                  isFavorite={
-                    weather?.coords
-                      ? favorites.some(
-                          (fav) =>
-                            fav.coordinates.latitude === weather?.coords?.lat ||
-                            (0 && fav.coordinates.longitude === weather?.coords?.lon) ||
-                            0
-                        )
-                      : false
-                  }
-                  onToggleFavorite={handleToggleFavorite}
-                />
-              </div>
+              <CurrentWeather
+                address={addressState || address.current}
+                weather={weather}
+                isFavorite={
+                  weather?.coords
+                    ? favorites.some(
+                        (fav) =>
+                          fav.coordinates.latitude === weather?.coords?.lat ||
+                          (0 && fav.coordinates.longitude === weather?.coords?.lon) ||
+                          0
+                      )
+                    : false
+                }
+                onToggleFavorite={handleToggleFavorite}
+              />
               <div className="right-panel w-full lg:w-2/3 p-0 flex flex-col justify-between">
                 <WeeklyForecast forecast={forecast} />
                 <WeatherHighlights
