@@ -116,7 +116,7 @@ const Home: React.FC = () => {
           favorites={favorites}
           onSelectFavorite={handleSelectFavorite}
         />
-        <div className="content-wrapper flex flex-col md:flex-row gap-4 flex-1">
+        <div className="content-wrapper flex flex-col lg:flex-row gap-4 flex-1">
           {loading ? (
             <div className="flex-1 flex items-center justify-center">
               <LoadingSpinner />
@@ -125,7 +125,7 @@ const Home: React.FC = () => {
             <div className="flex-1 flex items-center justify-center text-red-500">{error}</div>
           ) : (
             <>
-              <div className="left-panel w-full md:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center relative">
+              <div className="left-panel w-full lg:w-1/3 bg-white p-8 rounded-lg shadow flex items-center justify-center relative">
                 <CurrentWeather
                   address={addressState || address.current}
                   weather={weather}
@@ -142,7 +142,7 @@ const Home: React.FC = () => {
                   onToggleFavorite={handleToggleFavorite}
                 />
               </div>
-              <div className="right-panel w-full md:w-2/3 p-0 flex flex-col justify-between">
+              <div className="right-panel w-full lg:w-2/3 p-0 flex flex-col justify-between">
                 <WeeklyForecast forecast={forecast} />
                 <WeatherHighlights
                   highlights={{

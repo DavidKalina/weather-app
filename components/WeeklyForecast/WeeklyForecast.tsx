@@ -58,7 +58,7 @@ const WeeklyForecast: React.FC<WeeklyForecastProps> = ({ forecast }) => {
         className="weekly-forecast grid grid-cols-2 md:grid-cols-4 gap-4"
         variants={containerVariants}
       >
-        {forecast.map((day, index) => (
+        {forecast.slice(1).map((day, index) => (
           <motion.div
             key={index}
             className="day-forecast text-center bg-white p-4 rounded-lg shadow cursor-pointer"
