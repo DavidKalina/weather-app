@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { WeatherAPIResponse, ForecastData } from "@/types";
 import { fetchWeather, fetchForecast, WeatherData } from "@/utils/api";
+import useWeatherCache from "./useWeatherCache";
 
 interface UseWeatherProps {
   unit: "C" | "F";
@@ -15,13 +16,25 @@ const useWeather = ({ unit, coords }: UseWeatherProps) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { getCachedWeather, setCachedWeather } = useWeatherCache();
+
   const handleSearch = useCallback(
-    async (newCoords?: { latitude: number; longitude: number }) => {
+    async (newCoords?: { latitude: number; longitude: number }, forceRefresh: boolean = false) => {
       const fetchCoords = newCoords || coords;
       if (!fetchCoords) return;
 
       setLoading(true);
       setError(null);
+
+      if (!forceRefresh) {
+        const cachedData = getCachedWeather(fetchCoords, unit);
+        if (cachedData) {
+          setWeather(cachedData.weather);
+          setForecast(cachedData.forecast);
+          setLoading(false);
+          return;
+        }
+      }
 
       try {
         // Fetch comprehensive weather data including air quality
@@ -60,6 +73,10 @@ const useWeather = ({ unit, coords }: UseWeatherProps) => {
         // Fetch and set forecast
         const forecastData: ForecastData[] = await fetchForecast(weatherAPIResponse);
         setForecast(forecastData);
+        setCachedWeather(fetchCoords, unit, {
+          weather: mappedWeather,
+          forecast: forecastData,
+        });
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -73,7 +90,7 @@ const useWeather = ({ unit, coords }: UseWeatherProps) => {
         }, 800);
       }
     },
-    [coords, unit]
+    [coords, unit, getCachedWeather, setCachedWeather]
   );
 
   // Fetch weather data when coords or unit change
