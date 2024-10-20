@@ -99,9 +99,7 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     if (weather?.coords?.lat && weather.coords.lon) {
-      if (lastToastedUnit.current !== unit) {
-        handleSearch({ latitude: weather.coords.lat, longitude: weather.coords.lon });
-      }
+      handleSearch({ latitude: weather.coords.lat, longitude: weather.coords.lon });
     }
   }, [unit]);
 
