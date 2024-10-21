@@ -90,4 +90,4 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
   );
 };
 
-export default CurrentWeather;
+export default React.memo(CurrentWeather);

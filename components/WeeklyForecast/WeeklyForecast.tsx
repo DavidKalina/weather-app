@@ -80,4 +80,4 @@ const WeeklyForecast: React.FC<WeeklyForecastProps> = ({ forecast }) => {
   );
 };
 
-export default WeeklyForecast;
+export default React.memo(WeeklyForecast);

@@ -23,4 +23,4 @@ const FavoritesList: React.FC<FavoritesListProps> = ({ favorites, onSelectFavori
   );
 };
 
-export default FavoritesList;
+export default React.memo(FavoritesList);

@@ -127,4 +127,4 @@ const WeatherHighlights: React.FC<WeatherHighlightsProps> = ({ highlights }) => 
   );
 };
 
-export default WeatherHighlights;
+export default React.memo(WeatherHighlights);
