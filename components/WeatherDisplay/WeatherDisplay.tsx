@@ -80,7 +80,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({
         {/* Weather Description */}
         <div className="conditions flex items-center mt-4">
           <p className="description mr-2 capitalize">{weather.description}</p>
-          <p className="rain-chance">Precipitation: {weather.rainChance}%</p>
+          <p className="rain-chance">Precipitation: {weather.rainChance.toFixed(2)}%</p>
         </div>
 
         {/* Location */}
