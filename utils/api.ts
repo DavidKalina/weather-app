@@ -18,7 +18,7 @@ const mapDailyToForecast = (daily: WeatherAPIResponse["daily"]): ForecastData[] 
     date: convertUnixToDate(day.dt),
     temperature: Math.round(day.temp.day),
     description: day.weather[0].description,
-    icon: `http://openweathermap.org/img/wn/${day.weather[0].icon}.png`,
+    icon: `https://openweathermap.org/img/wn/${day.weather[0].icon}.png`,
   }));
 };
 
