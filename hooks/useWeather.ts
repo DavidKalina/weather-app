@@ -51,7 +51,7 @@ const useWeather = ({ unit, coords }: UseWeatherProps) => {
           rainChance: weatherAPIResponse.hourly[0]?.pop * 100 || 0, // Example: using the first hourly pop
           description: weatherAPIResponse.current.weather[0].description,
           icon: weatherAPIResponse.current.weather[0].icon
-            ? `http://openweathermap.org/img/wn/${weatherAPIResponse.current.weather[0].icon}.png`
+            ? `https://openweathermap.org/img/wn/${weatherAPIResponse.current.weather[0].icon}.png`
             : "",
           humidity: weatherAPIResponse.current.humidity,
           windSpeed: Math.round(weatherAPIResponse.current.wind_speed * 10) / 10,
